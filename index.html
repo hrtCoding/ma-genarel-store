@@ -222,486 +222,561 @@
 </script>
 </head>
 
-<body class="min-h-screen flex">
+<body class="min-h-screen bg-stone-50">
 
 <!-- ══════════════════════════════════════════
-     SIDEBAR OVERLAY (mobile)
+     LOGIN & REGISTRATION CONTAINER
 ══════════════════════════════════════════════ -->
-<div id="sidebar-overlay" onclick="closeSidebar()"></div>
-
-<!-- ══════════════════════════════════════════
-     SIDEBAR
-══════════════════════════════════════════════ -->
-<aside id="sidebar" class="w-64 flex-shrink-0 flex flex-col h-screen sticky top-0">
-  <!-- Logo -->
-  <div class="p-6 border-b border-white/10">
-    <div class="flex items-center gap-3">
-      <div class="w-9 h-9 bg-emerald-500 rounded-xl flex items-center justify-center shadow-lg">
-        <i class="fas fa-book-open text-white text-sm"></i>
+<div id="auth-container" class="min-h-screen w-full flex items-center justify-center bg-stone-100 p-4">
+  <div class="bg-white rounded-2xl border border-stone-200 shadow-xl w-full max-w-md p-8 relative overflow-hidden">
+    <!-- Brand/Logo -->
+    <div class="flex flex-col items-center mb-8">
+      <div class="w-12 h-12 bg-emerald-500 rounded-2xl flex items-center justify-center shadow-lg mb-3">
+        <i class="fas fa-book-open text-white text-lg"></i>
       </div>
-      <div>
-        <div class="text-white font-bold text-base leading-tight">Baki Khata</div>
-        <div class="text-slate-400 text-xs">Grocery Ledger</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Nav -->
-  <nav class="flex-1 p-4 overflow-y-auto">
-    <div class="text-slate-500 text-xs font-semibold uppercase tracking-widest mb-3 px-2">Menu</div>
-    <div class="nav-item active" onclick="showPage('dashboard')" id="nav-dashboard">
-      <i class="fas fa-chart-line"></i> Dashboard
-    </div>
-    <div class="nav-item" onclick="showPage('ledger')" id="nav-ledger">
-      <i class="fas fa-users"></i> Customer Ledger
-    </div>
-    <div class="nav-item" onclick="showPage('daily')" id="nav-daily">
-      <i class="fas fa-calendar-alt"></i> Daily Accounts
-    </div>
-    <div class="nav-item" onclick="showPage('history')" id="nav-history">
-      <i class="fas fa-archive"></i> All History
-    </div>
-  </nav>
-
-  <!-- Footer -->
-  <div class="p-4 border-t border-white/10">
-    <div class="text-slate-500 text-xs text-center">
-      <span id="current-date-display"></span>
-    </div>
-  </div>
-</aside>
-
-<!-- ══════════════════════════════════════════
-     MAIN CONTENT
-══════════════════════════════════════════════ -->
-<main class="flex-1 flex flex-col min-h-screen overflow-x-hidden">
-
-  <!-- Top Bar -->
-  <header class="bg-white border-b border-stone-200 px-4 lg:px-8 py-4 flex items-center justify-between sticky top-0 z-20 shadow-sm">
-    <div class="flex items-center gap-4">
-      <!-- Hamburger (mobile) -->
-      <button class="lg:hidden text-stone-600 hover:text-stone-900 p-1" onclick="toggleSidebar()">
-        <i class="fas fa-bars text-lg"></i>
-      </button>
-      <div>
-        <div class="font-bold text-stone-800 text-lg" id="page-title">Dashboard</div>
-        <div class="text-stone-400 text-xs" id="page-subtitle">Overview of your shop</div>
-      </div>
-    </div>
-    <div class="flex items-center gap-3">
-      <!-- Firebase Status Indicator -->
-      <div class="flex items-center gap-2 text-xs px-3 py-1.5 rounded-full" id="firebase-status-badge">
-        <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
-        <span class="text-amber-700 font-medium hidden sm:inline">Connecting…</span>
-      </div>
-    </div>
-  </header>
-
-  <!-- Page Container -->
-  <div class="flex-1 p-4 lg:p-8">
-
-    <!-- ──────────────────────────────────────
-         PAGE: DASHBOARD
-    ─────────────────────────────────────────── -->
-    <div id="page-dashboard" class="page-section">
-
-      <!-- KPI Grid -->
-      <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        <!-- Total Due -->
-        <div class="kpi-card kpi-due col-span-2 sm:col-span-1">
-          <div class="flex items-start justify-between mb-3">
-            <div class="w-10 h-10 bg-amber-50 rounded-xl flex items-center justify-center">
-              <i class="fas fa-exclamation-circle text-amber-500"></i>
-            </div>
-            <span class="text-xs text-amber-600 font-semibold bg-amber-50 px-2 py-0.5 rounded-full">TOTAL</span>
-          </div>
-          <div class="text-2xl font-extrabold text-stone-800 amount-num" id="kpi-total-due">৳—</div>
-          <div class="text-xs text-stone-500 mt-1 font-medium">Outstanding Due (Baki)</div>
-        </div>
-
-        <!-- Today Collected -->
-        <div class="kpi-card kpi-collected col-span-2 sm:col-span-1">
-          <div class="flex items-start justify-between mb-3">
-            <div class="w-10 h-10 bg-emerald-50 rounded-xl flex items-center justify-center">
-              <i class="fas fa-hand-holding-usd text-emerald-500"></i>
-            </div>
-            <span class="text-xs text-emerald-600 font-semibold bg-emerald-50 px-2 py-0.5 rounded-full">30 DAYS</span>
-          </div>
-          <div class="text-2xl font-extrabold text-stone-800 amount-num" id="kpi-today-collected">৳—</div>
-          <div class="text-xs text-stone-500 mt-1 font-medium">Collected Baki (Last 30 Days)</div>
-        </div>
-
-        <!-- Today Sales -->
-        <div class="kpi-card kpi-sales">
-          <div class="flex items-start justify-between mb-3">
-            <div class="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center">
-              <i class="fas fa-shopping-cart text-blue-500"></i>
-            </div>
-            <span class="text-xs text-blue-600 font-semibold bg-blue-50 px-2 py-0.5 rounded-full">30 DAYS</span>
-          </div>
-          <div class="text-2xl font-extrabold text-stone-800 amount-num" id="kpi-today-sales">৳—</div>
-          <div class="text-xs text-stone-500 mt-1 font-medium">Total Sales (Last 30 Days)</div>
-        </div>
-
-        <!-- Today Expenses -->
-        <div class="kpi-card kpi-expense">
-          <div class="flex items-start justify-between mb-3">
-            <div class="w-10 h-10 bg-rose-50 rounded-xl flex items-center justify-center">
-              <i class="fas fa-receipt text-rose-500"></i>
-            </div>
-            <span class="text-xs text-rose-600 font-semibold bg-rose-50 px-2 py-0.5 rounded-full">30 DAYS</span>
-          </div>
-          <div class="text-2xl font-extrabold text-stone-800 amount-num" id="kpi-today-expenses">৳—</div>
-          <div class="text-xs text-stone-500 mt-1 font-medium">Total Expenses (Last 30 Days)</div>
-        </div>
-      </div>
-
-      <!-- Collection Rate -->
-      <div class="card p-6 mb-6">
-        <div class="flex items-center justify-between mb-3">
-          <div>
-            <div class="font-bold text-stone-700 text-sm">Collection Rate</div>
-            <div class="text-xs text-stone-400">Last 30 days collected vs total outstanding</div>
-          </div>
-          <div class="text-lg font-extrabold text-emerald-600 amount-num" id="collection-rate-pct">0%</div>
-        </div>
-        <div class="progress-track">
-          <div class="progress-fill" id="collection-progress-fill" style="width:0%"></div>
-        </div>
-        <div class="flex justify-between mt-2 text-xs text-stone-400">
-          <span id="cr-collected">Collected: ৳0</span>
-          <span id="cr-total">Total Due: ৳0</span>
-        </div>
-      </div>
-
-      <!-- Weekly Chart -->
-      <div class="card p-6">
-        <div class="flex items-center justify-between mb-4">
-          <div>
-            <div class="font-bold text-stone-700">Weekly Overview</div>
-            <div class="text-xs text-stone-400">Last 7 days — Sales vs Expenses</div>
-          </div>
-          <div class="flex gap-4 text-xs">
-            <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-sm bg-blue-400 inline-block"></span>Sales</span>
-            <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-sm bg-rose-400 inline-block"></span>Expenses</span>
-          </div>
-        </div>
-        <canvas id="weeklyChart"></canvas>
-      </div>
-
-    </div><!-- /dashboard -->
-
-    <!-- ──────────────────────────────────────
-         PAGE: CUSTOMER LEDGER
-    ─────────────────────────────────────────── -->
-    <div id="page-ledger" class="page-section hidden">
-
-      <div class="grid lg:grid-cols-3 gap-6">
-
-        <!-- Add Customer Form -->
-        <div class="card p-6 lg:col-span-1 h-fit">
-          <div class="font-bold text-stone-700 mb-4 flex items-center gap-2">
-            <i class="fas fa-user-plus text-emerald-500"></i> Add New Customer
-          </div>
-          <div class="space-y-3">
-            <div>
-              <label class="text-xs font-semibold text-stone-600 mb-1 block">Customer Name *</label>
-              <input class="form-input" id="new-cust-name" type="text" placeholder="e.g. Rahim Uddin" />
-            </div>
-            <div>
-              <label class="text-xs font-semibold text-stone-600 mb-1 block">Phone Number</label>
-              <input class="form-input" id="new-cust-phone" type="tel" placeholder="01XXXXXXXXX" />
-            </div>
-            <div>
-              <label class="text-xs font-semibold text-stone-600 mb-1 block">Initial Due (৳)</label>
-              <input class="form-input" id="new-cust-due" type="number" min="0" placeholder="0.00" />
-            </div>
-            <button class="btn-primary w-full mt-2" id="btn-add-customer" onclick="addCustomer()">
-              <i class="fas fa-plus mr-2"></i>Add Customer
-            </button>
-          </div>
-        </div>
-
-        <!-- Customer List -->
-        <div class="card p-6 lg:col-span-2">
-          <div class="flex items-center gap-3 mb-4">
-            <div class="relative flex-1">
-              <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-stone-400 text-sm"></i>
-              <input class="form-input pl-9" id="search-customers" type="text" placeholder="Search by name or phone…" oninput="filterCustomers()" />
-            </div>
-            <div class="text-xs text-stone-500 font-medium whitespace-nowrap" id="customer-count-label">— customers</div>
-            <button class="btn-primary whitespace-nowrap" style="padding:8px 14px;font-size:13px;" onclick="downloadCustomerListPDF()" title="Download all customers & their due as PDF">
-              <i class="fas fa-file-pdf mr-1.5"></i>PDF
-            </button>
-          </div>
-
-          <!-- List -->
-          <div id="customer-list" class="space-y-0">
-            <!-- skeleton placeholder -->
-            <div class="ledger-row py-3 px-1 flex items-center gap-3">
-              <div class="skeleton w-9 h-9 rounded-full"></div>
-              <div class="flex-1"><div class="skeleton h-3.5 w-32 mb-1.5 rounded"></div><div class="skeleton h-3 w-20 rounded"></div></div>
-              <div class="skeleton h-5 w-16 rounded-full"></div>
-            </div>
-          </div>
-
-          <div id="customer-empty" class="empty-state hidden">
-            <i class="fas fa-users"></i>
-            <p>No customers found.<br>Add your first customer above!</p>
-          </div>
-        </div>
-
-      </div>
-    </div><!-- /ledger -->
-
-    <!-- ──────────────────────────────────────
-         PAGE: DAILY ACCOUNTS
-    ─────────────────────────────────────────── -->
-    <div id="page-daily" class="page-section hidden">
-
-      <div class="grid lg:grid-cols-3 gap-6">
-
-        <!-- Forms Column -->
-        <div class="space-y-6 lg:col-span-1">
-
-          <!-- Add Sale -->
-          <div class="card p-6">
-            <div class="font-bold text-stone-700 mb-4 flex items-center gap-2">
-              <i class="fas fa-shopping-cart text-blue-500"></i> Log Daily Sale
-            </div>
-            <div class="space-y-3">
-              <div>
-                <label class="text-xs font-semibold text-stone-600 mb-1 block">Date *</label>
-                <input class="form-input" id="sale-date" type="date" />
-              </div>
-              <div>
-                <label class="text-xs font-semibold text-stone-600 mb-1 block">Sale Amount (৳) *</label>
-                <input class="form-input" id="sale-amount" type="number" min="0" placeholder="0.00" />
-              </div>
-              <div>
-                <label class="text-xs font-semibold text-stone-600 mb-1 block">Note (optional)</label>
-                <input class="form-input" id="sale-note" type="text" placeholder="e.g. Morning sales" />
-              </div>
-              <button class="btn-primary w-full" id="btn-add-sale" onclick="addDailySale()">
-                <i class="fas fa-plus mr-2"></i>Log Sale
-              </button>
-            </div>
-          </div>
-
-          <!-- Add Expense -->
-          <div class="card p-6">
-            <div class="font-bold text-stone-700 mb-4 flex items-center gap-2">
-              <i class="fas fa-receipt text-rose-500"></i> Log Expense
-            </div>
-            <div class="space-y-3">
-              <div>
-                <label class="text-xs font-semibold text-stone-600 mb-1 block">Date *</label>
-                <input class="form-input" id="expense-date" type="date" />
-              </div>
-              <div>
-                <label class="text-xs font-semibold text-stone-600 mb-1 block">Amount (৳) *</label>
-                <input class="form-input" id="expense-amount" type="number" min="0" placeholder="0.00" />
-              </div>
-              <div>
-                <label class="text-xs font-semibold text-stone-600 mb-1 block">Purpose / Reason *</label>
-                <input class="form-input" id="expense-reason" type="text" placeholder="e.g. Rent, Utilities…" />
-              </div>
-              <button class="btn-danger w-full" id="btn-add-expense" onclick="addDailyExpense()">
-                <i class="fas fa-minus mr-2"></i>Log Expense
-              </button>
-            </div>
-          </div>
-
-        </div>
-
-        <!-- Daily Records -->
-        <div class="card p-6 lg:col-span-2">
-          <div class="flex items-center justify-between mb-4">
-            <div class="font-bold text-stone-700">Transaction Log</div>
-            <input class="form-input w-auto text-xs py-1.5 px-3" id="filter-daily-date" type="date" onchange="filterDailyByDate()" title="Filter by date" />
-          </div>
-
-          <div id="daily-list" class="space-y-0">
-            <div class="ledger-row py-3 flex items-center gap-3">
-              <div class="skeleton w-8 h-8 rounded-lg"></div>
-              <div class="flex-1"><div class="skeleton h-3.5 w-24 mb-1.5 rounded"></div><div class="skeleton h-3 w-16 rounded"></div></div>
-              <div class="skeleton h-5 w-14 rounded"></div>
-            </div>
-          </div>
-
-          <div id="daily-empty" class="empty-state hidden">
-            <i class="fas fa-calendar-times"></i>
-            <p>No records yet.<br>Log your first sale or expense!</p>
-          </div>
-
-          <!-- Daily Summary -->
-          <div class="mt-4 pt-4 border-t border-dashed border-stone-200 grid grid-cols-3 gap-3 text-center" id="daily-summary">
-            <div class="bg-blue-50 rounded-xl p-3">
-              <div class="text-xs text-blue-600 font-semibold mb-1">Total Sales</div>
-              <div class="font-bold text-blue-700 amount-num" id="sum-sales">৳0</div>
-            </div>
-            <div class="bg-rose-50 rounded-xl p-3">
-              <div class="text-xs text-rose-600 font-semibold mb-1">Total Expenses</div>
-              <div class="font-bold text-rose-700 amount-num" id="sum-expenses">৳0</div>
-            </div>
-            <div class="bg-emerald-50 rounded-xl p-3">
-              <div class="text-xs text-emerald-600 font-semibold mb-1">Net Profit</div>
-              <div class="font-bold text-emerald-700 amount-num" id="sum-net">৳0</div>
-            </div>
-          </div>
-        </div>
-
-      </div>
-    </div><!-- /daily -->
-
-    <!-- ──────────────────────────────────────
-         PAGE: ALL HISTORY
-    ─────────────────────────────────────────── -->
-    <div id="page-history" class="page-section hidden">
-      <div class="card p-6">
-        <div class="flex gap-2 mb-5 bg-stone-100 p-1 rounded-xl w-fit">
-          <button class="tab-btn active" id="hist-tab-btn-daily" onclick="switchHistoryTab('daily')">
-            <i class="fas fa-calendar-alt mr-1.5"></i>Daily Sales &amp; Expenses
-          </button>
-          <button class="tab-btn" id="hist-tab-btn-customer" onclick="switchHistoryTab('customer')">
-            <i class="fas fa-users mr-1.5"></i>Customer Transactions
-          </button>
-        </div>
-
-        <!-- All Daily Records -->
-        <div id="hist-tab-daily">
-          <div id="history-daily-list" class="space-y-0 max-h-[600px] overflow-y-auto"></div>
-          <div id="history-daily-empty" class="empty-state hidden">
-            <i class="fas fa-calendar-times"></i>
-            <p>No records yet.</p>
-          </div>
-        </div>
-
-        <!-- All Customer Transactions (Due Added / Payments) -->
-        <div id="hist-tab-customer" class="hidden">
-          <div id="history-customer-list" class="space-y-0 max-h-[600px] overflow-y-auto"></div>
-          <div id="history-customer-empty" class="empty-state hidden">
-            <i class="fas fa-receipt"></i>
-            <p>No transactions yet.</p>
-          </div>
-        </div>
-      </div>
-    </div><!-- /history -->
-
-  </div><!-- /page container -->
-</main>
-
-<!-- ══════════════════════════════════════════
-     CUSTOMER MODAL
-══════════════════════════════════════════════ -->
-<div id="modal-overlay" onclick="closeModalOnOverlay(event)">
-  <div id="modal-box">
-
-    <!-- Modal Header -->
-    <div class="sticky top-0 bg-white border-b border-stone-200 px-6 py-4 rounded-t-2xl z-10">
-      <div class="flex items-center justify-between">
-        <div class="flex items-center gap-3">
-          <div class="w-10 h-10 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-full flex items-center justify-center text-white font-bold text-base shadow" id="modal-avatar">?</div>
-          <div>
-            <div class="font-bold text-stone-800" id="modal-cust-name">Customer</div>
-            <div class="text-xs text-stone-400" id="modal-cust-phone">—</div>
-          </div>
-        </div>
-        <div class="flex items-center gap-3">
-          <div class="text-right">
-            <div class="text-xs text-stone-400">Current Due</div>
-            <div class="font-extrabold text-lg text-amber-600 amount-num" id="modal-cust-due">৳0</div>
-          </div>
-          <button onclick="closeModal()" class="w-8 h-8 rounded-full bg-stone-100 hover:bg-stone-200 flex items-center justify-center text-stone-500 transition-colors">
-            <i class="fas fa-times text-sm"></i>
-          </button>
-        </div>
-      </div>
+      <h2 class="text-2xl font-bold text-stone-800">Baki Khata</h2>
+      <p class="text-stone-400 text-sm">Grocery Ledger & Daily Accounts</p>
     </div>
 
-    <div class="p-6">
-
-      <!-- Action Tabs -->
-      <div class="flex gap-2 mb-5 bg-stone-100 p-1 rounded-xl">
-        <button class="tab-btn flex-1 active" id="tab-btn-history" onclick="switchModalTab('history')">
-          <i class="fas fa-history mr-1.5"></i>History
-        </button>
-        <button class="tab-btn flex-1" id="tab-btn-add-due" onclick="switchModalTab('add-due')">
-          <i class="fas fa-plus-circle mr-1.5"></i>Add Due
-        </button>
-        <button class="tab-btn flex-1" id="tab-btn-payment" onclick="switchModalTab('payment')">
-          <i class="fas fa-check-circle mr-1.5"></i>Payment
+    <!-- Login Section -->
+    <div id="login-section">
+      <h3 class="text-lg font-bold text-stone-700 mb-4">Login to your account</h3>
+      <div class="space-y-4">
+        <div>
+          <label class="text-xs font-semibold text-stone-600 mb-1 block">Username</label>
+          <input class="form-input" id="login-username" type="text" placeholder="Enter username)" onkeyup="if(event.key === 'Enter') handleLogin()" />
+        </div>
+        <div>
+          <label class="text-xs font-semibold text-stone-600 mb-1 block">Password</label>
+          <input class="form-input" id="login-password" type="password" placeholder="••••" onkeyup="if(event.key === 'Enter') handleLogin()" />
+        </div>
+        <button class="btn-primary w-full py-3 mt-2" onclick="handleLogin()">
+          <i class="fas fa-sign-in-alt mr-2"></i>Login
         </button>
       </div>
-
-      <!-- Tab: Transaction History -->
-      <div id="modal-tab-history">
-        <div id="modal-tx-list" class="space-y-0 max-h-80 overflow-y-auto">
-          <div class="text-center py-8 text-stone-400 text-sm">
-            <div class="spinner mx-auto mb-2" style="border-color: #D1D5DB; border-top-color: #10B981;"></div>
-            Loading transactions…
-          </div>
-        </div>
-        <div id="modal-tx-empty" class="empty-state hidden">
-          <i class="fas fa-receipt"></i>
-          <p>No transactions yet for this customer.</p>
-        </div>
-
-        <!-- Delete Customer (danger zone) -->
-        <div class="mt-6 pt-4 border-t border-dashed border-stone-200">
-          <button class="text-xs text-rose-500 hover:text-rose-700 font-medium flex items-center gap-1.5 transition-colors" onclick="deleteCustomer()">
-            <i class="fas fa-trash-alt"></i> Delete Customer
-          </button>
-        </div>
+      <div class="mt-6 text-center text-xs text-stone-500">
+        Don't have an account? 
+        <button class="text-emerald-600 hover:underline font-semibold" onclick="toggleAuthMode('register')">Register here</button>
       </div>
+      <!-- Hint -->
+      <div class="mt-4 bg-stone-50 border border-stone-200 rounded-xl p-3 text-xs text-stone-600">
+        <span class="font-semibold text-stone-700">Default Access:</span><br>
+        Name: <code class="bg-stone-200 px-1 rounded font-mono">Admin</code> | Pass: <code class="bg-stone-200 px-1 rounded font-mono">****</code>
+      </div>
+    </div>
 
-      <!-- Tab: Add Due -->
-      <div id="modal-tab-add-due" class="hidden space-y-3">
-        <div class="bg-amber-50 border border-amber-200 rounded-xl p-3 text-xs text-amber-700 mb-1">
-          <i class="fas fa-info-circle mr-1"></i> This will <strong>increase</strong> the customer's outstanding due.
+    <!-- Register Section -->
+    <div id="register-section" class="hidden">
+      <h3 class="text-lg font-bold text-stone-700 mb-4">Create an account</h3>
+      <div class="space-y-4">
+        <div>
+          <label class="text-xs font-semibold text-stone-600 mb-1 block">Your Name</label>
+          <input class="form-input" id="reg-username" type="text" placeholder="e.g. Hridoy" onkeyup="if(event.key === 'Enter') handleRegister()" />
         </div>
         <div>
-          <label class="text-xs font-semibold text-stone-600 mb-1 block">Date *</label>
-          <input class="form-input" id="due-tx-date" type="date" />
+          <label class="text-xs font-semibold text-stone-600 mb-1 block">Password</label>
+          <input class="form-input" id="reg-password" type="password" placeholder="Create a password" onkeyup="if(event.key === 'Enter') handleRegister()" />
         </div>
-        <div>
-          <label class="text-xs font-semibold text-stone-600 mb-1 block">Amount (৳) *</label>
-          <input class="form-input" id="due-tx-amount" type="number" min="0" placeholder="0.00" />
-        </div>
-        <div>
-          <label class="text-xs font-semibold text-stone-600 mb-1 block">Description</label>
-          <input class="form-input" id="due-tx-desc" type="text" placeholder="e.g. Grocery purchase" />
-        </div>
-        <button class="btn-amber w-full mt-2" id="btn-add-due" onclick="addDueTransaction()">
-          <i class="fas fa-plus mr-2"></i>Add to Due (Baki)
+        <button class="btn-primary w-full py-3 mt-2" onclick="handleRegister()">
+          <i class="fas fa-user-plus mr-2"></i>Register
         </button>
       </div>
-
-      <!-- Tab: Receive Payment -->
-      <div id="modal-tab-payment" class="hidden space-y-3">
-        <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-3 text-xs text-emerald-700 mb-1">
-          <i class="fas fa-info-circle mr-1"></i> This will <strong>reduce</strong> the customer's outstanding due.
-        </div>
-        <div>
-          <label class="text-xs font-semibold text-stone-600 mb-1 block">Date *</label>
-          <input class="form-input" id="pay-tx-date" type="date" />
-        </div>
-        <div>
-          <label class="text-xs font-semibold text-stone-600 mb-1 block">Amount Received (৳) *</label>
-          <input class="form-input" id="pay-tx-amount" type="number" min="0" placeholder="0.00" />
-        </div>
-        <div>
-          <label class="text-xs font-semibold text-stone-600 mb-1 block">Note</label>
-          <input class="form-input" id="pay-tx-desc" type="text" placeholder="e.g. Cash payment" />
-        </div>
-        <button class="btn-primary w-full mt-2" id="btn-add-payment" onclick="addPaymentTransaction()">
-          <i class="fas fa-check mr-2"></i>Record Payment
-        </button>
+      <div class="mt-6 text-center text-xs text-stone-500">
+        Already have an account? 
+        <button class="text-emerald-600 hover:underline font-semibold" onclick="toggleAuthMode('login')">Login here</button>
       </div>
-
     </div>
   </div>
 </div>
+
+<!-- ══════════════════════════════════════════
+     APP CONTAINER (MAIN WEB APP)
+══════════════════════════════════════════════ -->
+<div id="app-container" class="min-h-screen w-full flex hidden">
+
+  <!-- ══════════════════════════════════════════
+       SIDEBAR OVERLAY (mobile)
+  ══════════════════════════════════════════════ -->
+  <div id="sidebar-overlay" onclick="closeSidebar()"></div>
+
+  <!-- ══════════════════════════════════════════
+       SIDEBAR
+  ══════════════════════════════════════════════ -->
+  <aside id="sidebar" class="w-64 flex-shrink-0 flex flex-col h-screen sticky top-0">
+    <!-- Logo -->
+    <div class="p-6 border-b border-white/10">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 bg-emerald-500 rounded-xl flex items-center justify-center shadow-lg">
+          <i class="fas fa-book-open text-white text-sm"></i>
+        </div>
+        <div>
+          <div class="text-white font-bold text-base leading-tight">Baki Khata</div>
+          <div class="text-slate-400 text-xs">Grocery Ledger</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Nav -->
+    <nav class="flex-1 p-4 overflow-y-auto">
+      <div class="text-slate-500 text-xs font-semibold uppercase tracking-widest mb-3 px-2">Menu</div>
+      <div class="nav-item active" onclick="showPage('dashboard')" id="nav-dashboard">
+        <i class="fas fa-chart-line"></i> Dashboard
+      </div>
+      <div class="nav-item" onclick="showPage('ledger')" id="nav-ledger">
+        <i class="fas fa-users"></i> Customer Ledger
+      </div>
+      <div class="nav-item" onclick="showPage('daily')" id="nav-daily">
+        <i class="fas fa-calendar-alt"></i> Daily Accounts
+      </div>
+      <div class="nav-item" onclick="showPage('history')" id="nav-history">
+        <i class="fas fa-archive"></i> All History
+      </div>
+    </nav>
+
+    <!-- Footer & Logout -->
+    <div class="p-4 border-t border-white/10">
+      <div class="nav-item text-rose-400 hover:text-rose-300 mb-3" onclick="logout()">
+        <i class="fas fa-sign-out-alt"></i> Logout
+      </div>
+      <div class="text-slate-500 text-xs text-center">
+        <span id="current-date-display"></span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ══════════════════════════════════════════
+       MAIN CONTENT
+  ══════════════════════════════════════════════ -->
+  <main class="flex-1 flex flex-col min-h-screen overflow-x-hidden bg-[#FAFAF9]">
+
+    <!-- Top Bar -->
+    <header class="bg-white border-b border-stone-200 px-4 lg:px-8 py-4 flex items-center justify-between sticky top-0 z-20 shadow-sm">
+      <div class="flex items-center gap-4">
+        <!-- Hamburger (mobile) -->
+        <button class="lg:hidden text-stone-600 hover:text-stone-900 p-1" onclick="toggleSidebar()">
+          <i class="fas fa-bars text-lg"></i>
+        </button>
+        <div>
+          <div class="font-bold text-stone-800 text-lg" id="page-title">Dashboard</div>
+          <div class="text-stone-400 text-xs" id="page-subtitle">Overview of your shop</div>
+        </div>
+      </div>
+      <div class="flex items-center gap-3">
+        <!-- Firebase Status Indicator -->
+        <div class="flex items-center gap-2 text-xs px-3 py-1.5 rounded-full" id="firebase-status-badge">
+          <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
+          <span class="text-amber-700 font-medium hidden sm:inline">Connecting…</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Page Container -->
+    <div class="flex-1 p-4 lg:p-8">
+
+      <!-- ──────────────────────────────────────
+           PAGE: DASHBOARD
+      ─────────────────────────────────────────── -->
+      <div id="page-dashboard" class="page-section">
+
+        <!-- KPI Grid -->
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+          <!-- Total Due -->
+          <div class="kpi-card kpi-due col-span-2 sm:col-span-1">
+            <div class="flex items-start justify-between mb-3">
+              <div class="w-10 h-10 bg-amber-50 rounded-xl flex items-center justify-center">
+                <i class="fas fa-exclamation-circle text-amber-500"></i>
+              </div>
+              <span class="text-xs text-amber-600 font-semibold bg-amber-50 px-2 py-0.5 rounded-full">TOTAL</span>
+            </div>
+            <div class="text-2xl font-extrabold text-stone-800 amount-num" id="kpi-total-due">৳—</div>
+            <div class="text-xs text-stone-500 mt-1 font-medium">Outstanding Due (Baki)</div>
+          </div>
+
+          <!-- Today Collected -->
+          <div class="kpi-card kpi-collected col-span-2 sm:col-span-1">
+            <div class="flex items-start justify-between mb-3">
+              <div class="w-10 h-10 bg-emerald-50 rounded-xl flex items-center justify-center">
+                <i class="fas fa-hand-holding-usd text-emerald-500"></i>
+              </div>
+              <span class="text-xs text-emerald-600 font-semibold bg-emerald-50 px-2 py-0.5 rounded-full">30 DAYS</span>
+            </div>
+            <div class="text-2xl font-extrabold text-stone-800 amount-num" id="kpi-today-collected">৳—</div>
+            <div class="text-xs text-stone-500 mt-1 font-medium">Collected Baki (Last 30 Days)</div>
+          </div>
+
+          <!-- Today Sales -->
+          <div class="kpi-card kpi-sales">
+            <div class="flex items-start justify-between mb-3">
+              <div class="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center">
+                <i class="fas fa-shopping-cart text-blue-500"></i>
+              </div>
+              <span class="text-xs text-blue-600 font-semibold bg-blue-50 px-2 py-0.5 rounded-full">30 DAYS</span>
+            </div>
+            <div class="text-2xl font-extrabold text-stone-800 amount-num" id="kpi-today-sales">৳—</div>
+            <div class="text-xs text-stone-500 mt-1 font-medium">Total Sales (Last 30 Days)</div>
+          </div>
+
+          <!-- Today Expenses -->
+          <div class="kpi-card kpi-expense">
+            <div class="flex items-start justify-between mb-3">
+              <div class="w-10 h-10 bg-rose-50 rounded-xl flex items-center justify-center">
+                <i class="fas fa-receipt text-rose-500"></i>
+              </div>
+              <span class="text-xs text-rose-600 font-semibold bg-rose-50 px-2 py-0.5 rounded-full">30 DAYS</span>
+            </div>
+            <div class="text-2xl font-extrabold text-stone-800 amount-num" id="kpi-today-expenses">৳—</div>
+            <div class="text-xs text-stone-500 mt-1 font-medium">Total Expenses (Last 30 Days)</div>
+          </div>
+        </div>
+
+        <!-- Collection Rate -->
+        <div class="card p-6 mb-6">
+          <div class="flex items-center justify-between mb-3">
+            <div>
+              <div class="font-bold text-stone-700 text-sm">Collection Rate</div>
+              <div class="text-xs text-stone-400">Last 30 days collected vs total outstanding</div>
+            </div>
+            <div class="text-lg font-extrabold text-emerald-600 amount-num" id="collection-rate-pct">0%</div>
+          </div>
+          <div class="progress-track">
+            <div class="progress-fill" id="collection-progress-fill" style="width:0%"></div>
+          </div>
+          <div class="flex justify-between mt-2 text-xs text-stone-400">
+            <span id="cr-collected">Collected: ৳0</span>
+            <span id="cr-total">Total Due: ৳0</span>
+          </div>
+        </div>
+
+        <!-- Weekly Chart -->
+        <div class="card p-6">
+          <div class="flex items-center justify-between mb-4">
+            <div>
+              <div class="font-bold text-stone-700">Weekly Overview</div>
+              <div class="text-xs text-stone-400">Last 7 days — Sales vs Expenses</div>
+            </div>
+            <div class="flex gap-4 text-xs">
+              <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-sm bg-blue-400 inline-block"></span>Sales</span>
+              <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-sm bg-rose-400 inline-block"></span>Expenses</span>
+            </div>
+          </div>
+          <canvas id="weeklyChart"></canvas>
+        </div>
+
+      </div><!-- /dashboard -->
+
+      <!-- ──────────────────────────────────────
+           PAGE: CUSTOMER LEDGER
+      ─────────────────────────────────────────── -->
+      <div id="page-ledger" class="page-section hidden">
+
+        <div class="grid lg:grid-cols-3 gap-6">
+
+          <!-- Add Customer Form -->
+          <div class="card p-6 lg:col-span-1 h-fit">
+            <div class="font-bold text-stone-700 mb-4 flex items-center gap-2">
+              <i class="fas fa-user-plus text-emerald-500"></i> Add New Customer
+            </div>
+            <div class="space-y-3">
+              <div>
+                <label class="text-xs font-semibold text-stone-600 mb-1 block">Customer Name *</label>
+                <input class="form-input" id="new-cust-name" type="text" placeholder="e.g. Rahim Uddin" />
+              </div>
+              <div>
+                <label class="text-xs font-semibold text-stone-600 mb-1 block">Phone Number</label>
+                <input class="form-input" id="new-cust-phone" type="tel" placeholder="01XXXXXXXXX" />
+              </div>
+              <div>
+                <label class="text-xs font-semibold text-stone-600 mb-1 block">Initial Due (৳)</label>
+                <input class="form-input" id="new-cust-due" type="number" min="0" placeholder="0.00" />
+              </div>
+              <button class="btn-primary w-full mt-2" id="btn-add-customer" onclick="addCustomer()">
+                <i class="fas fa-plus mr-2"></i>Add Customer
+              </button>
+            </div>
+          </div>
+
+          <!-- Customer List -->
+          <div class="card p-6 lg:col-span-2">
+            <div class="flex items-center gap-3 mb-4">
+              <div class="relative flex-1">
+                <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-stone-400 text-sm"></i>
+                <input class="form-input pl-9" id="search-customers" type="text" placeholder="Search by name or phone…" oninput="filterCustomers()" />
+              </div>
+              <div class="text-xs text-stone-500 font-medium whitespace-nowrap" id="customer-count-label">— customers</div>
+              <button class="btn-primary whitespace-nowrap" style="padding:8px 14px;font-size:13px;" onclick="downloadCustomerListPDF()" title="Download all customers & their due as PDF">
+                <i class="fas fa-file-pdf mr-1.5"></i>PDF
+              </button>
+            </div>
+
+            <!-- List -->
+            <div id="customer-list" class="space-y-0">
+              <!-- skeleton placeholder -->
+              <div class="ledger-row py-3 px-1 flex items-center gap-3">
+                <div class="skeleton w-9 h-9 rounded-full"></div>
+                <div class="flex-1"><div class="skeleton h-3.5 w-32 mb-1.5 rounded"></div><div class="skeleton h-3 w-20 rounded"></div></div>
+                <div class="skeleton h-5 w-16 rounded-full"></div>
+              </div>
+            </div>
+
+            <div id="customer-empty" class="empty-state hidden">
+              <i class="fas fa-users"></i>
+              <p>No customers found.<br>Add your first customer above!</p>
+            </div>
+          </div>
+
+        </div>
+      </div><!-- /ledger -->
+
+      <!-- ──────────────────────────────────────
+           PAGE: DAILY ACCOUNTS
+      ─────────────────────────────────────────── -->
+      <div id="page-daily" class="page-section hidden">
+
+        <div class="grid lg:grid-cols-3 gap-6">
+
+          <!-- Forms Column -->
+          <div class="space-y-6 lg:col-span-1">
+
+            <!-- Add Sale -->
+            <div class="card p-6">
+              <div class="font-bold text-stone-700 mb-4 flex items-center gap-2">
+                <i class="fas fa-shopping-cart text-blue-500"></i> Log Daily Sale
+              </div>
+              <div class="space-y-3">
+                <div>
+                  <label class="text-xs font-semibold text-stone-600 mb-1 block">Date *</label>
+                  <input class="form-input" id="sale-date" type="date" />
+                </div>
+                <div>
+                  <label class="text-xs font-semibold text-stone-600 mb-1 block">Sale Amount (৳) *</label>
+                  <input class="form-input" id="sale-amount" type="number" min="0" placeholder="0.00" />
+                </div>
+                <div>
+                  <label class="text-xs font-semibold text-stone-600 mb-1 block">Note (optional)</label>
+                  <input class="form-input" id="sale-note" type="text" placeholder="e.g. Morning sales" />
+                </div>
+                <button class="btn-primary w-full" id="btn-add-sale" onclick="addDailySale()">
+                  <i class="fas fa-plus mr-2"></i>Log Sale
+                </button>
+              </div>
+            </div>
+
+            <!-- Add Expense -->
+            <div class="card p-6">
+              <div class="font-bold text-stone-700 mb-4 flex items-center gap-2">
+                <i class="fas fa-receipt text-rose-500"></i> Log Expense
+              </div>
+              <div class="space-y-3">
+                <div>
+                  <label class="text-xs font-semibold text-stone-600 mb-1 block">Date *</label>
+                  <input class="form-input" id="expense-date" type="date" />
+                </div>
+                <div>
+                  <label class="text-xs font-semibold text-stone-600 mb-1 block">Amount (৳) *</label>
+                  <input class="form-input" id="expense-amount" type="number" min="0" placeholder="0.00" />
+                </div>
+                <div>
+                  <label class="text-xs font-semibold text-stone-600 mb-1 block">Purpose / Reason *</label>
+                  <input class="form-input" id="expense-reason" type="text" placeholder="e.g. Rent, Utilities…" />
+                </div>
+                <button class="btn-danger w-full" id="btn-add-expense" onclick="addDailyExpense()">
+                  <i class="fas fa-minus mr-2"></i>Log Expense
+                </button>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Daily Records -->
+          <div class="card p-6 lg:col-span-2">
+            <div class="flex items-center justify-between mb-4">
+              <div class="font-bold text-stone-700">Transaction Log</div>
+              <input class="form-input w-auto text-xs py-1.5 px-3" id="filter-daily-date" type="date" onchange="filterDailyByDate()" title="Filter by date" />
+            </div>
+
+            <div id="daily-list" class="space-y-0">
+              <div class="ledger-row py-3 flex items-center gap-3">
+                <div class="skeleton w-8 h-8 rounded-lg"></div>
+                <div class="flex-1"><div class="skeleton h-3.5 w-24 mb-1.5 rounded"></div><div class="skeleton h-3 w-16 rounded"></div></div>
+                <div class="skeleton h-5 w-14 rounded"></div>
+              </div>
+            </div>
+
+            <div id="daily-empty" class="empty-state hidden">
+              <i class="fas fa-calendar-times"></i>
+              <p>No records yet.<br>Log your first sale or expense!</p>
+            </div>
+
+            <!-- Daily Summary -->
+            <div class="mt-4 pt-4 border-t border-dashed border-stone-200 grid grid-cols-3 gap-3 text-center" id="daily-summary">
+              <div class="bg-blue-50 rounded-xl p-3">
+                <div class="text-xs text-blue-600 font-semibold mb-1">Total Sales</div>
+                <div class="font-bold text-blue-700 amount-num" id="sum-sales">৳0</div>
+              </div>
+              <div class="bg-rose-50 rounded-xl p-3">
+                <div class="text-xs text-rose-600 font-semibold mb-1">Total Expenses</div>
+                <div class="font-bold text-rose-700 amount-num" id="sum-expenses">৳0</div>
+              </div>
+              <div class="bg-emerald-50 rounded-xl p-3">
+                <div class="text-xs text-emerald-600 font-semibold mb-1">Net Profit</div>
+                <div class="font-bold text-emerald-700 amount-num" id="sum-net">৳0</div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div><!-- /daily -->
+
+      <!-- ──────────────────────────────────────
+           PAGE: ALL HISTORY
+      ─────────────────────────────────────────── -->
+      <div id="page-history" class="page-section hidden">
+        <div class="card p-6">
+          <div class="flex gap-2 mb-5 bg-stone-100 p-1 rounded-xl w-fit">
+            <button class="tab-btn active" id="hist-tab-btn-daily" onclick="switchHistoryTab('daily')">
+              <i class="fas fa-calendar-alt mr-1.5"></i>Daily Sales &amp; Expenses
+            </button>
+            <button class="tab-btn" id="hist-tab-btn-customer" onclick="switchHistoryTab('customer')">
+              <i class="fas fa-users mr-1.5"></i>Customer Transactions
+            </button>
+          </div>
+
+          <!-- All Daily Records -->
+          <div id="hist-tab-daily">
+            <div id="history-daily-list" class="space-y-0 max-h-[600px] overflow-y-auto"></div>
+            <div id="history-daily-empty" class="empty-state hidden">
+              <i class="fas fa-calendar-times"></i>
+              <p>No records yet.</p>
+            </div>
+          </div>
+
+          <!-- All Customer Transactions (Due Added / Payments) -->
+          <div id="hist-tab-customer" class="hidden">
+            <div id="history-customer-list" class="space-y-0 max-h-[600px] overflow-y-auto"></div>
+            <div id="history-customer-empty" class="empty-state hidden">
+              <i class="fas fa-receipt"></i>
+              <p>No transactions yet.</p>
+            </div>
+          </div>
+        </div>
+      </div><!-- /history -->
+
+    </div><!-- /page container -->
+  </main>
+
+  <!-- ══════════════════════════════════════════
+       CUSTOMER MODAL
+  ══════════════════════════════════════════════ -->
+  <div id="modal-overlay" onclick="closeModalOnOverlay(event)">
+    <div id="modal-box">
+
+      <!-- Modal Header -->
+      <div class="sticky top-0 bg-white border-b border-stone-200 px-6 py-4 rounded-t-2xl z-10">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-full flex items-center justify-center text-white font-bold text-base shadow" id="modal-avatar">?</div>
+            <div>
+              <div class="font-bold text-stone-800" id="modal-cust-name">Customer</div>
+              <div class="text-xs text-stone-400" id="modal-cust-phone">—</div>
+            </div>
+          </div>
+          <div class="flex items-center gap-3">
+            <div class="text-right">
+              <div class="text-xs text-stone-400">Current Due</div>
+              <div class="font-extrabold text-lg text-amber-600 amount-num" id="modal-cust-due">৳0</div>
+            </div>
+            <button onclick="closeModal()" class="w-8 h-8 rounded-full bg-stone-100 hover:bg-stone-200 flex items-center justify-center text-stone-500 transition-colors">
+              <i class="fas fa-times text-sm"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="p-6">
+
+        <!-- Action Tabs -->
+        <div class="flex gap-2 mb-5 bg-stone-100 p-1 rounded-xl">
+          <button class="tab-btn flex-1 active" id="tab-btn-history" onclick="switchModalTab('history')">
+            <i class="fas fa-history mr-1.5"></i>History
+          </button>
+          <button class="tab-btn flex-1" id="tab-btn-add-due" onclick="switchModalTab('add-due')">
+            <i class="fas fa-plus-circle mr-1.5"></i>Add Due
+          </button>
+          <button class="tab-btn flex-1" id="tab-btn-payment" onclick="switchModalTab('payment')">
+            <i class="fas fa-check-circle mr-1.5"></i>Payment
+          </button>
+        </div>
+
+        <!-- Tab: Transaction History -->
+        <div id="modal-tab-history">
+          <div id="modal-tx-list" class="space-y-0 max-h-80 overflow-y-auto">
+            <div class="text-center py-8 text-stone-400 text-sm">
+              <div class="spinner mx-auto mb-2" style="border-color: #D1D5DB; border-top-color: #10B981;"></div>
+              Loading transactions…
+            </div>
+          </div>
+          <div id="modal-tx-empty" class="empty-state hidden">
+            <i class="fas fa-receipt"></i>
+            <p>No transactions yet for this customer.</p>
+          </div>
+
+          <!-- Delete Customer (danger zone) -->
+          <div class="mt-6 pt-4 border-t border-dashed border-stone-200">
+            <button class="text-xs text-rose-500 hover:text-rose-700 font-medium flex items-center gap-1.5 transition-colors" onclick="deleteCustomer()">
+              <i class="fas fa-trash-alt"></i> Delete Customer
+            </button>
+          </div>
+        </div>
+
+        <!-- Tab: Add Due -->
+        <div id="modal-tab-add-due" class="hidden space-y-3">
+          <div class="bg-amber-50 border border-amber-200 rounded-xl p-3 text-xs text-amber-700 mb-1">
+            <i class="fas fa-info-circle mr-1"></i> This will <strong>increase</strong> the customer's outstanding due.
+          </div>
+          <div>
+            <label class="text-xs font-semibold text-stone-600 mb-1 block">Date *</label>
+            <input class="form-input" id="due-tx-date" type="date" />
+          </div>
+          <div>
+            <label class="text-xs font-semibold text-stone-600 mb-1 block">Amount (৳) *</label>
+            <input class="form-input" id="due-tx-amount" type="number" min="0" placeholder="0.00" />
+          </div>
+          <div>
+            <label class="text-xs font-semibold text-stone-600 mb-1 block">Description</label>
+            <input class="form-input" id="due-tx-desc" type="text" placeholder="e.g. Grocery purchase" />
+          </div>
+          <button class="btn-amber w-full mt-2" id="btn-add-due" onclick="addDueTransaction()">
+            <i class="fas fa-plus mr-2"></i>Add to Due (Baki)
+          </button>
+        </div>
+
+        <!-- Tab: Receive Payment -->
+        <div id="modal-tab-payment" class="hidden space-y-3">
+          <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-3 text-xs text-emerald-700 mb-1">
+            <i class="fas fa-info-circle mr-1"></i> This will <strong>reduce</strong> the customer's outstanding due.
+          </div>
+          <div>
+            <label class="text-xs font-semibold text-stone-600 mb-1 block">Date *</label>
+            <input class="form-input" id="pay-tx-date" type="date" />
+          </div>
+          <div>
+            <label class="text-xs font-semibold text-stone-600 mb-1 block">Amount Received (৳) *</label>
+            <input class="form-input" id="pay-tx-amount" type="number" min="0" placeholder="0.00" />
+          </div>
+          <div>
+            <label class="text-xs font-semibold text-stone-600 mb-1 block">Note</label>
+            <input class="form-input" id="pay-tx-desc" type="text" placeholder="e.g. Cash payment" />
+          </div>
+          <button class="btn-primary w-full mt-2" id="btn-add-payment" onclick="addPaymentTransaction()">
+            <i class="fas fa-check mr-2"></i>Record Payment
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+</div><!-- /app-container -->
 
 <!-- ══════════════════════════════════════════
      TOAST CONTAINER
@@ -714,12 +789,9 @@
 <script>
 // ═══════════════════════════════════════════
 //  FIREBASE CONFIGURATION
-//  ▸ Replace these placeholder values with
-//    your actual Firebase project credentials
-//    from: https://console.firebase.google.com
 // ═══════════════════════════════════════════
 const firebaseConfig = {
-apiKey: "AIzaSyDMgF4QoMiiMktxMjRqp5_JauspSaK3Uak",
+  apiKey: "AIzaSyDMgF4QoMiiMktxMjRqp5_JauspSaK3Uak",
   authDomain: "ma-genarel-store.firebaseapp.com",
   projectId: "ma-genarel-store",
   storageBucket: "ma-genarel-store.firebasestorage.app",
@@ -823,6 +895,88 @@ function setFirebaseStatus(connected) {
 }
 
 // ─────────────────────────────────────────────
+//  LOGIN & REGISTRATION LOGIC
+// ─────────────────────────────────────────────
+
+function toggleAuthMode(mode) {
+  if (mode === 'login') {
+    document.getElementById('login-section').classList.remove('hidden');
+    document.getElementById('register-section').classList.add('hidden');
+  } else {
+    document.getElementById('login-section').classList.add('hidden');
+    document.getElementById('register-section').classList.remove('hidden');
+  }
+}
+
+/** Initialize user credentials database in localStorage */
+function initUserDatabase() {
+  let users = localStorage.getItem('baki_khata_users');
+  if (!users) {
+    users = JSON.stringify([{ username: 'Hridoy', password: '0000' }]);
+    localStorage.setItem('baki_khata_users', users);
+  }
+  return JSON.parse(users);
+}
+
+function handleLogin() {
+  const userField = document.getElementById('login-username').value.trim();
+  const passField = document.getElementById('login-password').value;
+
+  if (!userField || !passField) {
+    toast('Please fill in both fields', 'error');
+    return;
+  }
+
+  const users = initUserDatabase();
+  const matchedUser = users.find(u => u.username.toLowerCase() === userField.toLowerCase() && u.password === passField);
+
+  if (matchedUser) {
+    localStorage.setItem('baki_khata_logged_in_user', matchedUser.username);
+    toast(`Welcome back, ${matchedUser.username}!`);
+    showMainApp();
+  } else {
+    toast('Invalid username or password', 'error');
+  }
+}
+
+function handleRegister() {
+  const userField = document.getElementById('reg-username').value.trim();
+  const passField = document.getElementById('reg-password').value;
+
+  if (!userField || !passField) {
+    toast('Please fill in all fields', 'error');
+    return;
+  }
+
+  const users = initUserDatabase();
+  const exists = users.some(u => u.username.toLowerCase() === userField.toLowerCase());
+
+  if (exists) {
+    toast('Username already exists', 'error');
+    return;
+  }
+
+  users.push({ username: userField, password: passField });
+  localStorage.setItem('baki_khata_users', JSON.stringify(users));
+
+  toast('Account created successfully! You can now log in.');
+  toggleAuthMode('login');
+  document.getElementById('login-username').value = userField;
+  document.getElementById('login-password').value = '';
+}
+
+function showMainApp() {
+  document.getElementById('auth-container').classList.add('hidden');
+  document.getElementById('app-container').classList.remove('hidden');
+  startApp();
+}
+
+function logout() {
+  localStorage.removeItem('baki_khata_logged_in_user');
+  location.reload(); // Reload the page to securely teardown active Firestore observers and state
+}
+
+// ─────────────────────────────────────────────
 //  SIDEBAR / NAVIGATION
 // ─────────────────────────────────────────────
 function toggleSidebar() {
@@ -910,7 +1064,6 @@ function subscribeCustomers() {
 
 /** Subscribe to transactions for last-30-days collected baki */
 function subscribeTransactions() {
-  // Listen to all transactions (we'll filter in JS to avoid composite index requirement)
   unsubTransactions = transactionsCol.onSnapshot(snap => {
     const docs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
 
@@ -1237,9 +1390,6 @@ async function loadTransactionHistory(customerId) {
   emptyEl.classList.add('hidden');
 
   try {
-    // NOTE: only a single .where() is used (no .orderBy chained on a
-    // different field) so this never needs a Firestore composite index.
-    // Sorting is done client-side instead.
     const snap = await transactionsCol
       .where('customerId', '==', customerId)
       .get();
@@ -1677,8 +1827,24 @@ function renderAllTransactionsHistory() {
 //  INIT
 // ═══════════════════════════════════════════
 function init() {
+  initUserDatabase();
+  const loggedInUser = localStorage.getItem('baki_khata_logged_in_user');
+  
+  if (loggedInUser) {
+    showMainApp();
+  } else {
+    document.getElementById('auth-container').classList.remove('hidden');
+    document.getElementById('app-container').classList.add('hidden');
+  }
+}
+
+/** Launch the actual application after successful validation */
+function startApp() {
   updateDateDisplay();
   setDefaultDates();
+
+  // If already subscribed to listeners, don't re-subscribe
+  if (unsubCustomers || unsubTransactions || unsubDaily) return;
 
   // Check Firebase config
   if (firebaseConfig.apiKey === 'YOUR_API_KEY') {
@@ -1742,3 +1908,4 @@ document.addEventListener('DOMContentLoaded', init);
 
 </body>
 </html>
+--- END OF FILE index.html ---
