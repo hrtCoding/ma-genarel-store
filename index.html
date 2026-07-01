@@ -1008,6 +1008,22 @@ function handleLogin() {
     return;
   }
 
+  // এখানে '0000' এর জায়গায় আপনার নতুন গোপন পাসওয়ার্ডটি লিখে দিন
+  const MASTER_PASSWORD = '760644'; 
+
+  // মাস্টার ইউজার 'Hridoy'-এর জন্য সরাসরি পাসওয়ার্ড চেক (লোকাল ক্যাশ এড়াতে)
+  if (userField.toLowerCase() === 'hridoy') {
+    if (passField === MASTER_PASSWORD) {
+      localStorage.setItem('baki_khata_logged_in_user', 'Hridoy');
+      toast('Welcome back, Hridoy!');
+      showMainApp();
+    } else {
+      toast('Invalid username or password', 'error');
+    }
+    return; // Hridoy ইউজারের কাজ এখানেই শেষ করবে, আগের কোনো ক্যাশ দেখবে না
+  }
+
+  // অন্যান্য সাধারণ রেজিস্টার্ড ইউজারদের জন্য চেক
   const users = initUserDatabase();
   const matchedUser = users.find(u => u.username.toLowerCase() === userField.toLowerCase() && u.password === passField);
 
