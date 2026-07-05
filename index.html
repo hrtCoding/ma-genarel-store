@@ -227,15 +227,15 @@
 <!-- ══════════════════════════════════════════
      LOGIN & REGISTRATION CONTAINER
 ══════════════════════════════════════════════ -->
-<div id="auth-container" class="min-h-screen w-full flex items-center justify-center bg-stone-100 p-4" style="display: none;">
+<div id="auth-container" class="min-h-screen w-full flex items-center justify-center bg-stone-100 p-4">
   <div class="bg-white rounded-2xl border border-stone-200 shadow-xl w-full max-w-md p-8 relative overflow-hidden">
     <!-- Brand/Logo -->
     <div class="flex flex-col items-center mb-8">
       <div class="w-12 h-12 bg-emerald-500 rounded-2xl flex items-center justify-center shadow-lg mb-3">
         <i class="fas fa-book-open text-white text-lg"></i>
       </div>
-      <h2 class="text-2xl font-bold text-stone-800 text-center">Ma Genarel Store</h2>
-      <p class="text-emerald-600 font-semibold text-xs tracking-wide">Created by Hridoy</p>
+      <h2 class="text-2xl font-bold text-stone-800">Ma Genarel Store</h2>
+      <p class="text-stone-400 text-sm">Created by Hridoy</p>
     </div>
 
     <!-- Login Section -->
@@ -266,7 +266,7 @@
     </div>
 
     <!-- Register Section -->
-    <div id="register-section" class="hidden">
+    <div id="register-section" class="hidden" style="display:none">
       <h3 class="text-lg font-bold text-stone-700 mb-4">Create an account</h3>
       <div class="space-y-4">
         <div>
@@ -286,22 +286,17 @@
         <button class="text-emerald-600 hover:underline font-semibold" onclick="toggleAuthMode('login')">Login here</button>
       </div>
     </div>
-
-    <!-- Copyright Footer on Login -->
-    <div class="mt-8 text-center text-[11px] text-stone-400 border-t border-stone-100 pt-4">
-      This app created by Hridoy (Heart Coding)
-    </div>
   </div>
 </div>
 
 <!-- ══════════════════════════════════════════
      APP CONTAINER (MAIN WEB APP)
 ══════════════════════════════════════════════ -->
-<div id="app-container" class="min-h-screen w-full flex" style="display: none;">
+<div id="app-container" class="min-h-screen w-full flex hidden">
 
   <!-- ══════════════════════════════════════════
        SIDEBAR OVERLAY (mobile)
-  ═══════════════════════════════════════════ -->
+  ══════════════════════════════════════════════ -->
   <div id="sidebar-overlay" onclick="closeSidebar()"></div>
 
   <!-- ══════════════════════════════════════════
@@ -316,7 +311,7 @@
         </div>
         <div>
           <div class="text-white font-bold text-base leading-tight">Ma Genarel Store</div>
-          <div class="text-slate-400 text-xs font-medium">Created by Hridoy</div>
+          <div class="text-slate-400 text-xs">Created by Hridoy</div>
         </div>
       </div>
     </div>
@@ -346,10 +341,7 @@
       <div class="nav-item text-rose-400 hover:text-rose-300 mb-3" onclick="logout()">
         <i class="fas fa-sign-out-alt"></i> Logout
       </div>
-      <div class="text-slate-400 text-[10px] text-center mb-1 leading-normal">
-        This app created by Hridoy (Heart Coding)
-      </div>
-      <div class="text-slate-500 text-[10px] text-center">
+      <div class="text-slate-500 text-xs text-center">
         <span id="current-date-display"></span>
       </div>
     </div>
@@ -898,6 +890,7 @@ let allCustomers   = [];  // local cache of customers
 let allDaily       = [];  // local cache of daily_records
 let currentCustomer = null; // currently open modal customer
 let isAdminVerified = false; // special master admin verification flag
+let currentCustomerTxList = []; // last-loaded transactions for the open customer modal (for edit/delete)
 
 // Firestore real-time listeners (to detach if needed)
 let unsubCustomers = null;
@@ -993,7 +986,7 @@ function toggleAuthMode(mode) {
 function initUserDatabase() {
   let users = localStorage.getItem('baki_khata_users');
   if (!users) {
-    users = JSON.stringify([{ username: 'Hridoy', password: '760644' }]);
+    users = JSON.stringify([{ username: 'Hridoy', password: '0000' }]);
     localStorage.setItem('baki_khata_users', users);
   }
   return JSON.parse(users);
@@ -1008,22 +1001,6 @@ function handleLogin() {
     return;
   }
 
-  // এখানে '0000' এর জায়গায় আপনার নতুন গোপন পাসওয়ার্ডটি লিখে দিন
-  const MASTER_PASSWORD = '760644'; 
-
-  // মাস্টার ইউজার 'Hridoy'-এর জন্য সরাসরি পাসওয়ার্ড চেক (লোকাল ক্যাশ এড়াতে)
-  if (userField.toLowerCase() === 'hridoy') {
-    if (passField === MASTER_PASSWORD) {
-      localStorage.setItem('baki_khata_logged_in_user', 'Hridoy');
-      toast('Welcome back, Hridoy!');
-      showMainApp();
-    } else {
-      toast('Invalid username or password', 'error');
-    }
-    return; // Hridoy ইউজারের কাজ এখানেই শেষ করবে, আগের কোনো ক্যাশ দেখবে না
-  }
-
-  // অন্যান্য সাধারণ রেজিস্টার্ড ইউজারদের জন্য চেক
   const users = initUserDatabase();
   const matchedUser = users.find(u => u.username.toLowerCase() === userField.toLowerCase() && u.password === passField);
 
@@ -1063,8 +1040,8 @@ function handleRegister() {
 }
 
 function showMainApp() {
-  document.getElementById('auth-container').style.display = 'none';
-  document.getElementById('app-container').style.display = 'flex';
+  document.getElementById('auth-container').classList.add('hidden');
+  document.getElementById('app-container').classList.remove('hidden');
   startApp();
 }
 
@@ -1095,13 +1072,8 @@ function verifyAdmin() {
 }
 
 function lockAdminPanel() {
-  isAdminVerified = false;
-  sessionStorage.removeItem('baki_khata_admin_verified');
-  document.getElementById('users-content-wrapper').classList.add('hidden');
-  document.getElementById('users-auth-wrapper').classList.remove('hidden');
-  document.getElementById('admin-auth-user').value = '';
-  document.getElementById('admin-auth-pass').value = '';
-  toast('Admin section locked securely.', 'info');
+  // Simply return to the dashboard — no separate admin login form anymore.
+  showPage('dashboard');
 }
 
 function renderUsersList() {
@@ -1196,20 +1168,12 @@ function showPage(page) {
   document.getElementById('page-title').textContent = title;
   document.getElementById('page-subtitle').textContent = sub;
 
-  // Check auth boundary for users management segment
+  // Users management page: already logged in via the main login, so no second
+  // login/verification form is shown here anymore — go straight to the content.
   if (page === 'users') {
-    const sessionVerified = sessionStorage.getItem('baki_khata_admin_verified') === 'true';
-    if (isAdminVerified || sessionVerified) {
-      isAdminVerified = true;
-      document.getElementById('users-auth-wrapper').classList.add('hidden');
-      document.getElementById('users-content-wrapper').classList.remove('hidden');
-      renderUsersList();
-    } else {
-      document.getElementById('users-content-wrapper').classList.add('hidden');
-      document.getElementById('users-auth-wrapper').classList.remove('hidden');
-      document.getElementById('admin-auth-user').value = '';
-      document.getElementById('admin-auth-pass').value = '';
-    }
+    document.getElementById('users-auth-wrapper').classList.add('hidden');
+    document.getElementById('users-content-wrapper').classList.remove('hidden');
+    renderUsersList();
   }
 
   closeSidebar();
@@ -1504,75 +1468,62 @@ function downloadCustomerListPDF() {
 
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF();
+  const pageWidth = doc.internal.pageSize.getWidth();
 
   const sorted = [...allCustomers].sort((a, b) => a.name.localeCompare(b.name));
   const totalDue = sorted.reduce((s, c) => s + (parseFloat(c.currentDue) || 0), 0);
 
-  // Set Title (Ma Genarel Store)
-  doc.setFontSize(14);
+  doc.setFontSize(13);
   doc.setFont(undefined, 'bold');
-  doc.text('Ma Genarel Store — Customer Due List', 14, 18);
-  
-  // Set Subtitle
+  doc.text('Ma Genarel Store — Customer Due List', 14, 15);
   doc.setFontSize(8);
   doc.setFont(undefined, 'normal');
-  doc.text(`Generated: ${new Date().toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' })}`, 14, 24);
+  doc.text(`Generated: ${new Date().toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' })}`, 14, 20);
 
-  // Divide the customer list into 2 equal parts for a side-by-side table layout
-  const totalCount = sorted.length;
-  const half = Math.ceil(totalCount / 2);
-  const leftSide = sorted.slice(0, half);
-  const rightSide = sorted.slice(half);
+  // Two-customer-per-row layout (name + due only, no phone) so more rows fit per page
+  const half = Math.ceil(sorted.length / 2);
+  const leftHalf  = sorted.slice(0, half);
+  const rightHalf = sorted.slice(half);
 
   const rows = [];
   for (let i = 0; i < half; i++) {
-    const leftCust = leftSide[i];
-    const rightCust = rightSide[i];
-    
-    const leftIdx = i + 1;
-    const rightIdx = half + i + 1;
-
+    const l = leftHalf[i];
+    const r = rightHalf[i];
     rows.push([
-      leftCust ? leftIdx : '',
-      leftCust ? leftCust.name : '',
-      leftCust ? 'Tk ' + (parseFloat(leftCust.currentDue) || 0).toLocaleString('en-IN') : '',
-      rightCust ? rightIdx : '',
-      rightCust ? rightCust.name : '',
-      rightCust ? 'Tk ' + (parseFloat(rightCust.currentDue) || 0).toLocaleString('en-IN') : ''
+      i + 1,
+      l.name,
+      'Tk ' + (parseFloat(l.currentDue) || 0).toLocaleString('en-IN'),
+      r ? (half + i + 1) : '',
+      r ? r.name : '',
+      r ? 'Tk ' + (parseFloat(r.currentDue) || 0).toLocaleString('en-IN') : ''
     ]);
   }
 
   doc.autoTable({
-    startY: 28,
+    startY: 25,
     head: [['#', 'Name', 'Due', '#', 'Name', 'Due']],
     body: rows,
     theme: 'striped',
-    headStyles: { fillColor: [16, 185, 129], textColor: [255, 255, 255] },
-    styles: { fontSize: 8, cellPadding: 2.2 }, // Adjusted to match the visual screenshot style
+    headStyles: { fillColor: [16, 185, 129], fontSize: 8 },
+    styles: { fontSize: 8, cellPadding: 2 },
     columnStyles: {
-      0: { halign: 'left', cellWidth: 8 },
-      1: { halign: 'left' },
-      2: { halign: 'right' },
-      3: { halign: 'left', cellWidth: 8 },
-      4: { halign: 'left' },
-      5: { halign: 'right' }
+      0: { cellWidth: 8 },  2: { halign: 'right' },
+      3: { cellWidth: 8 },  5: { halign: 'right' }
+    },
+    didDrawPage: function () {
+      const pageHeight = doc.internal.pageSize.getHeight();
+      doc.setFontSize(7);
+      doc.setFont(undefined, 'italic');
+      doc.setTextColor(120, 113, 108);
+      doc.text('This app created by Hridoy (Heart Coding)', pageWidth / 2, pageHeight - 8, { align: 'center' });
+      doc.setTextColor(0, 0, 0);
     }
   });
 
-  const finalY = doc.lastAutoTable.finalY || 28;
+  const finalY = doc.lastAutoTable.finalY || 25;
+  doc.setFontSize(9);
   doc.setFont(undefined, 'bold');
-  doc.setFontSize(10);
-  doc.text(`Total Outstanding Due: Tk ${totalDue.toLocaleString('en-IN')}`, 14, finalY + 10);
-
-  // Inject copyright footer on every page of PDF
-  const pageCount = doc.internal.getNumberOfPages();
-  for (let i = 1; i <= pageCount; i++) {
-    doc.setPage(i);
-    doc.setFontSize(8);
-    doc.setFont(undefined, 'normal');
-    doc.setTextColor(120, 113, 108);
-    doc.text('This app created by Hridoy (Heart Coding)', 14, doc.internal.pageSize.height - 10);
-  }
+  doc.text(`Total Outstanding Due: Tk ${totalDue.toLocaleString('en-IN')}`, 14, finalY + 8);
 
   doc.save(`customer-due-list-${todayStr()}.pdf`);
   toast('Customer list PDF downloaded!');
@@ -1653,32 +1604,159 @@ async function loadTransactionHistory(customerId) {
       return bt - at;
     });
 
-    listEl.innerHTML = docs.map(tx => {
-      const isPayment = tx.type === 'payment';
-      const badgeClass = isPayment ? 'badge-payment' : 'badge-due';
-      const badgeText  = isPayment ? 'Payment' : 'Due Added';
-      const amtColor   = isPayment ? 'text-emerald-600' : 'text-amber-600';
-      const amtPrefix  = isPayment ? '−' : '+';
-      const icon       = isPayment ? 'fa-arrow-down text-emerald-500' : 'fa-arrow-up text-amber-500';
-      return `
-        <div class="ledger-row py-3 px-1 flex items-center gap-3">
-          <div class="w-8 h-8 rounded-lg bg-stone-100 flex items-center justify-center flex-shrink-0">
-            <i class="fas ${icon} text-sm"></i>
-          </div>
-          <div class="flex-1 min-w-0">
-            <div class="text-sm font-medium text-stone-700">${tx.description || badgeText}</div>
-            <div class="text-xs text-stone-400">${tx.date}</div>
-          </div>
-          <div class="text-right flex-shrink-0">
-            <div class="font-bold text-sm ${amtColor} amount-num">${amtPrefix}${fmt(tx.amount)}</div>
-            <span class="badge ${badgeClass}">${badgeText}</span>
-          </div>
-        </div>`;
-    }).join('');
+    currentCustomerTxList = docs; // keep for edit/delete lookups
+
+    listEl.innerHTML = docs.map(tx => renderTxRow(tx)).join('');
   } catch (err) {
     console.error(err);
     listEl.innerHTML = `<div class="text-center py-4 text-rose-500 text-sm"><i class="fas fa-exclamation-circle mr-1"></i> Error loading. Check Firestore indexes.</div>`;
     toast('Error loading transactions. You may need to create a Firestore composite index.', 'error');
+  }
+}
+
+/** Render a single transaction row (view mode) with Edit/Delete icons */
+function renderTxRow(tx) {
+  const isPayment  = tx.type === 'payment';
+  const badgeClass = isPayment ? 'badge-payment' : 'badge-due';
+  const badgeText  = isPayment ? 'Payment' : 'Due Added';
+  const amtColor   = isPayment ? 'text-emerald-600' : 'text-amber-600';
+  const amtPrefix  = isPayment ? '−' : '+';
+  const icon       = isPayment ? 'fa-arrow-down text-emerald-500' : 'fa-arrow-up text-amber-500';
+  return `
+    <div class="ledger-row py-3 px-1 flex items-center gap-3" id="tx-row-${tx.id}">
+      <div class="w-8 h-8 rounded-lg bg-stone-100 flex items-center justify-center flex-shrink-0">
+        <i class="fas ${icon} text-sm"></i>
+      </div>
+      <div class="flex-1 min-w-0">
+        <div class="text-sm font-medium text-stone-700">${tx.description || badgeText}</div>
+        <div class="text-xs text-stone-400">${tx.date}</div>
+      </div>
+      <div class="text-right flex-shrink-0">
+        <div class="font-bold text-sm ${amtColor} amount-num">${amtPrefix}${fmt(tx.amount)}</div>
+        <span class="badge ${badgeClass}">${badgeText}</span>
+      </div>
+      <div class="flex items-center gap-1.5 flex-shrink-0 ml-1">
+        <button onclick="editTxRow('${tx.id}')" title="Edit this entry" class="w-7 h-7 rounded-lg bg-stone-100 hover:bg-emerald-50 text-stone-500 hover:text-emerald-600 flex items-center justify-center transition-colors">
+          <i class="fas fa-pen text-xs"></i>
+        </button>
+        <button onclick="deleteTxRow('${tx.id}')" title="Delete this entry" class="w-7 h-7 rounded-lg bg-stone-100 hover:bg-rose-50 text-stone-500 hover:text-rose-600 flex items-center justify-center transition-colors">
+          <i class="fas fa-trash-alt text-xs"></i>
+        </button>
+      </div>
+    </div>`;
+}
+
+/** Switch a transaction row into an inline edit form (date + amount + description) */
+function editTxRow(txId) {
+  const tx = currentCustomerTxList.find(t => t.id === txId);
+  if (!tx) return;
+  const row = document.getElementById(`tx-row-${txId}`);
+  if (!row) return;
+  const isPayment = tx.type === 'payment';
+
+  row.outerHTML = `
+    <div class="ledger-row py-3 px-1" id="tx-row-${txId}">
+      <div class="bg-stone-50 border border-stone-200 rounded-xl p-3 space-y-2">
+        <div class="text-xs font-semibold ${isPayment ? 'text-emerald-600' : 'text-amber-600'} mb-1">
+          <i class="fas fa-pen mr-1"></i>Editing ${isPayment ? 'Payment' : 'Due Added'} entry
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="text-xs font-semibold text-stone-600 mb-1 block">Date</label>
+            <input class="form-input" style="padding:6px 10px;font-size:13px;" id="tx-edit-date-${txId}" type="date" value="${tx.date}" />
+          </div>
+          <div>
+            <label class="text-xs font-semibold text-stone-600 mb-1 block">Amount (৳)</label>
+            <input class="form-input" style="padding:6px 10px;font-size:13px;" id="tx-edit-amount-${txId}" type="number" min="0" value="${tx.amount}" />
+          </div>
+        </div>
+        <div>
+          <label class="text-xs font-semibold text-stone-600 mb-1 block">Description</label>
+          <input class="form-input" style="padding:6px 10px;font-size:13px;" id="tx-edit-desc-${txId}" type="text" value="${(tx.description || '').replace(/"/g, '&quot;')}" />
+        </div>
+        <div class="flex gap-2 pt-1">
+          <button onclick="saveTxEdit('${txId}')" class="btn-primary flex-1" style="padding:7px 12px;font-size:13px;">
+            <i class="fas fa-check mr-1"></i>Save
+          </button>
+          <button onclick="loadTransactionHistory(currentCustomer.id)" class="flex-1 rounded-lg border border-stone-300 text-stone-600 hover:bg-stone-100 font-semibold transition-colors" style="padding:7px 12px;font-size:13px;">
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>`;
+}
+
+/** Save an edited transaction: updates the tx doc and adjusts the customer's currentDue by the delta */
+async function saveTxEdit(txId) {
+  const tx = currentCustomerTxList.find(t => t.id === txId);
+  if (!tx || !currentCustomer) return;
+
+  const newDate   = document.getElementById(`tx-edit-date-${txId}`).value;
+  const newAmount = parseFloat(document.getElementById(`tx-edit-amount-${txId}`).value);
+  const newDesc   = document.getElementById(`tx-edit-desc-${txId}`).value.trim();
+
+  if (!newDate)   { toast('Please select a date.', 'error'); return; }
+  if (!newAmount || newAmount <= 0) { toast('Enter a valid amount.', 'error'); return; }
+
+  const oldAmount = parseFloat(tx.amount) || 0;
+  const isPayment = tx.type === 'payment';
+  // add_due increases due, payment decreases due — so the due-adjustment sign flips for payments
+  const dueDelta  = isPayment ? -(newAmount - oldAmount) : (newAmount - oldAmount);
+
+  try {
+    const batch = db.batch();
+    batch.update(transactionsCol.doc(txId), {
+      date: newDate,
+      amount: newAmount,
+      description: newDesc || (isPayment ? 'Cash payment' : 'Credit purchase')
+    });
+    batch.update(customersCol.doc(currentCustomer.id), {
+      currentDue: firebase.firestore.FieldValue.increment(dueDelta)
+    });
+    await batch.commit();
+
+    const newDue = (parseFloat(currentCustomer.currentDue) || 0) + dueDelta;
+    currentCustomer = { ...currentCustomer, currentDue: newDue };
+    document.getElementById('modal-cust-due').textContent = fmt(newDue);
+
+    toast('Entry updated successfully!');
+    loadTransactionHistory(currentCustomer.id);
+    allTransactionsLoaded = false;
+  } catch (err) {
+    console.error(err);
+    toast('Error updating entry: ' + err.message, 'error');
+  }
+}
+
+/** Delete a transaction entirely and reverse its effect on the customer's currentDue */
+async function deleteTxRow(txId) {
+  const tx = currentCustomerTxList.find(t => t.id === txId);
+  if (!tx || !currentCustomer) return;
+
+  if (!confirm(`Delete this ${tx.type === 'payment' ? 'payment' : 'due'} entry of ৳${tx.amount}? This cannot be undone.`)) return;
+
+  const isPayment = tx.type === 'payment';
+  // Reverse the original effect: deleting an add_due should decrease due, deleting a payment should increase due back
+  const dueDelta = isPayment ? parseFloat(tx.amount) : -parseFloat(tx.amount);
+
+  try {
+    const batch = db.batch();
+    batch.delete(transactionsCol.doc(txId));
+    batch.update(customersCol.doc(currentCustomer.id), {
+      currentDue: firebase.firestore.FieldValue.increment(dueDelta)
+    });
+    await batch.commit();
+
+    const newDue = Math.max(0, (parseFloat(currentCustomer.currentDue) || 0) + dueDelta);
+    currentCustomer = { ...currentCustomer, currentDue: newDue };
+    document.getElementById('modal-cust-due').textContent = fmt(newDue);
+
+    toast('Entry deleted.');
+    loadTransactionHistory(currentCustomer.id);
+    allTransactionsLoaded = false;
+  } catch (err) {
+    console.error(err);
+    toast('Error deleting entry: ' + err.message, 'error');
   }
 }
 
@@ -2131,8 +2209,8 @@ function init() {
   if (loggedInUser) {
     showMainApp();
   } else {
-    document.getElementById('auth-container').style.display = 'flex';
-    document.getElementById('app-container').style.display = 'none';
+    document.getElementById('auth-container').classList.remove('hidden');
+    document.getElementById('app-container').classList.add('hidden');
   }
 }
 
